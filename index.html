@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EchoNotch | AI Acoustic Tinnitus & Sensory Overload Live DSP Shield</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <span class="pulse-dot"></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M2 12h3l3-9 4 18 4-18 3 9h3"/>
+        </svg>
+      </div>
+      <div>
+        <h1>EchoNotch <span class="badge-version">DSP v1.0</span></h1>
+        <p class="subtitle">AI-Prescribed Spectral Notch Therapy &amp; Live Room Acoustic Shield</p>
+      </div>
+    </div>
+
+    <div class="topbar-status">
+      <div class="telemetry-chip">
+        <span class="chip-label">AUDIO ENGINE</span>
+        <span id="engineStatusBadge" class="chip-value status-standby">STANDBY</span>
+      </div>
+      <div class="telemetry-chip">
+        <span class="chip-label">SAMPLE RATE</span>
+        <span id="sampleRateReadout" class="chip-value">48,000 Hz</span>
+      </div>
+      <div class="telemetry-chip">
+        <span class="chip-label">SESSION TIMER</span>
+        <span id="sessionTimer" class="chip-value">00:00</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="workbench">
+    <!-- LEFT PANEL: AI SYMPTOM INTAKE & FREQUENCY CALIBRATION -->
+    <section class="panel panel-left">
+      <div class="panel-header">
+        <span class="step-tag">01</span>
+        <h2>Acoustic Diagnosis &amp; Intake</h2>
+      </div>
+
+      <div class="preset-bar">
+        <span class="section-micro-label">1-CLICK CLINICAL SCENARIOS (DEMO PRESETS)</span>
+        <div class="preset-pills">
+          <button type="button" class="pill active" data-preset="tinnitus_hvac">
+            6.2 kHz Ear Ringing + AC Hum
+          </button>
+          <button type="button" class="pill" data-preset="office_overload">
+            4.1 kHz Fatigue + Chatter Mask
+          </button>
+          <button type="button" class="pill" data-preset="high_pitch_cram">
+            8.0 kHz Sharp Ring + Deep Exam Focus
+          </button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="symptomInput">Describe Your Auditory Environment &amp; Symptoms</label>
+        <textarea id="symptomInput" rows="3" placeholder="e.g., High-pitched ringing in left ear around 6200 Hz, plus a low air-conditioner rumble in my dorm. Need 45 mins of deep coding focus.">High-pitched ringing in my left ear around 6200 Hz combined with a low 110 Hz air-conditioner hum. Need calm, zero-fatigue focus for coding.</textarea>
+      </div>
+
+      <details class="api-drawer">
+        <summary>Optional: Live Gemini API Key (Uses Deterministic Engine by Default)</summary>
+        <div class="api-input-wrap">
+          <input type="password" id="geminiApiKey" placeholder="Paste Gemini API Key (AIza...) or leave blank" />
+          <small>100% client-side. If blank, EchoNotch uses its built-in deterministic Acoustic NLP &amp; Physics Solver.</small>
+        </div>
+      </details>
+
+      <button type="button" id="prescribeBtn" class="btn btn-secondary btn-full">
+        <span>Synthesize AI Acoustic Prescription</span>
+      </button>
+
+      <hr class="divider" />
+
+      <!-- FREQUENCY CALIBRATOR -->
+      <div class="calibration-box">
+        <div class="cal-header">
+          <span class="section-micro-label">MANUAL / MIC FREQUENCY LOCK</span>
+          <span id="notchFreqBadge" class="freq-readout">6,200 Hz</span>
+        </div>
+
+        <label for="freqSlider" class="slider-label">
+          Target Tinnitus / Irritant Frequency 
+        </label>
+        <input type="range" id="freqSlider" min="200" max="12000" step="25" value="6200" />
+        <div class="scale-ticks">
+          <span>200 Hz</span>
+          <span>2 kHz</span>
+          <span>6 kHz</span>
+          <span>12 kHz</span>
+        </div>
+
+        <div class="cal-actions">
+          <button type="button" id="auditionToneBtn" class="btn btn-outline" title="Plays a gentle, volume-capped reference tone for 1.5s to verify frequency match">
+            Audition f₀ Tone (1.5s)
+          </button>
+          <button type="button" id="scanMicBtn" class="btn btn-outline">
+            Scan Room Mic Peak
+          </button>
+        </div>
+        <p id="micStatusText" class="micro-status">
+          Tip: Use "Audition Tone" to match your ear ringing pitch, or scan room noise.
+        </p>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: 60FPS REAL-TIME FFT SPECTRUM & AUDIO TRANSPORT -->
+    <section class="panel panel-center">
+      <div class="panel-header-row">
+        <div class="panel-header">
+          <span class="step-tag">02</span>
+          <h2>Live 60fps Spectral Notch Oscilloscope</h2>
+        </div>
+        <div class="legend-inline">
+          <span class="legend-item"><i class="dot-cyan"></i> Active Audio Spectrum</span>
+          <span class="legend-item"><i class="dot-crimson"></i> Carved Notch Canyon (Lateral Inhibition)</span>
+        </div>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="spectrumCanvas" width="760" height="330"></canvas>
+        <div class="canvas-overlay-top">
+          <div class="overlay-stat">
+            <span>NOTCH BAND</span>
+            <strong id="overlayNotchBand">5,193 Hz – 7,402 Hz</strong>
+          </div>
+          <div class="overlay-stat">
+            <span>ATTENUATION DEPTH</span>
+            <strong class="text-crimson">-38.4 dB (Dual Cascaded)</strong>
+          </div>
+          <div class="overlay-stat">
+            <span>Q-FACTOR</span>
+            <strong id="overlayQFactor">1.414 (1.0 Oct)</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER TRANSPORT & DSP CONTROLS -->
+      <div class="transport-bar">
+        <button type="button" id="toggleShieldBtn" class="btn btn-primary btn-hero">
+          <span id="shieldBtnIcon">&#9654;</span>
+          <span id="shieldBtnText">ENGAGE ACOUSTIC SHIELD</span>
+        </button>
+
+        <div class="transport-sliders">
+          <div class="mini-control">
+            <label for="volumeSlider">Safe-Fade Gain <span id="volumeValue">65%</span></label>
+            <input type="range" id="volumeSlider" min="5" max="100" value="65" />
+          </div>
+          <div class="mini-control">
+            <label for="bandwidthSelect">Notch Bandwidth (B)</label>
+            <select id="bandwidthSelect">
+              <option value="0.5">0.5 Octave (Surgical Narrow - Q: 2.87)</option>
+              <option value="1.0" selected>1.0 Octave (Clinical Standard - Q: 1.41)</option>
+              <option value="1.5">1.5 Octave (Wide Sensory Relief - Q: 0.92)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOUND TEXTURE & BINAURAL CONTROLS -->
+      <div class="dsp-matrix">
+        <div class="matrix-card">
+          <span class="section-micro-label">BASE THERAPEUTIC CARRIER</span>
+          <div class="segmented-control" id="noiseTypeGroup">
+            <button type="button" class="seg-btn active" data-noise="brown">Warm Brown (1/f²)</button>
+            <button type="button" class="seg-btn" data-noise="pink">Balanced Pink (1/f)</button>
+            <button type="button" class="seg-btn" data-noise="velvet">Soft Velvet Pulse</button>
+          </div>
+        </div>
+
+        <div class="matrix-card">
+          <span class="section-micro-label">HVAC RUMBLE HIGH-PASS CUTOFF</span>
+          <div class="inline-slider">
+            <input type="range" id="highpassSlider" min="40" max="300" step="10" value="120" />
+            <span id="highpassValue" class="mono-val">120 Hz</span>
+          </div>
+        </div>
+
+        <div class="matrix-card">
+          <span class="section-micro-label">BINAURAL NEURAL ENTRAINMENT (Δf)</span>
+          <div class="segmented-control" id="binauralGroup">
+            <button type="button" class="seg-btn" data-binaural="0">Off</button>
+            <button type="button" class="seg-btn" data-binaural="10">10 Hz Alpha (Calm)</button>
+            <button type="button" class="seg-btn active" data-binaural="14">14 Hz SMR (Focus)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: AI CLINICAL PRESCRIPTION & OFFLINE EXPORT -->
+    <section class="panel panel-right">
+      <div class="panel-header">
+        <span class="step-tag">03</span>
+        <h2>AI DSP Prescription &amp; Proof</h2>
+      </div>
+
+      <div class="prescription-card">
+        <div class="rx-header">
+          <span class="rx-symbol">&#8478;</span>
+          <div>
+            <h3 id="rxTitle">Left-Ear High-Tonal Notch + HVAC Cut</h3>
+            <span id="rxSourceTag" class="rx-tag">Deterministic Acoustic Engine</span>
+          </div>
+        </div>
+
+        <p id="rxRationale" class="rx-body">
+          Carving a 1.0-octave spectral canyon between 5,193 Hz and 7,402 Hz removes acoustic energy at your 6,200 Hz tinnitus pitch while stimulating adjacent hair cells—triggering lateral inhibition in the auditory cortex. A 120 Hz high-pass filter suppresses low-frequency compressor fatigue.
+        </p>
+
+        <div class="telemetry-grid">
+          <div class="t-box">
+            <span class="t-label">Center Notch </span>
+            <strong id="tCenterFreq">6,200 Hz</strong>
+          </div>
+          <div class="t-box">
+            <span class="t-label">Stop-Band (fL → fH)</span>
+            <strong id="tStopBand">5.19k – 7.40k Hz</strong>
+          </div>
+          <div class="t-box">
+            <span class="t-label">Filter Cascade</span>
+            <strong id="tCascade">Dual Biquad (Q=1.41)</strong>
+          </div>
+          <div class="t-box">
+            <span class="t-label">Entrainment</span>
+            <strong id="tEntrainment">14 Hz SMR Stereo</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="science-callout">
+        <h4>Why This Cannot Be Done in ChatGPT</h4>
+        <p>
+          Text chatbots cannot process live room audio or synthesize phase-accurate biquad notch filters. EchoNotch computes exact filter poles in real time:
+        </p>
+        <div class="formula-box">
+          <code>Q = &radic;(2<sup>B</sup>) / (2<sup>B</sup> &minus; 1) &bull; H(z) Dual-Notch Cascade</code>
+        </div>
+      </div>
+
+      <div class="export-zone">
+        <span class="section-micro-label">PORTABLE ACOUSTIC ARTIFACT</span>
+        <button type="button" id="exportCardBtn" class="btn btn-outline btn-full">
+          Export Standalone Therapy Card (.HTML)
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
